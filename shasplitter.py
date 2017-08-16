@@ -72,9 +72,6 @@ with open(real_in_file, 'r') as input_file:
 
 		# Progress message
 		if (line_count % progress_interval == 0):
-			for k in outfiles.keys():
-				outfiles[k].flush()
-				os.fsync(outfiles[k].fileno())
 			print("Completed line " + str(line_count)
 				+ ", " + str(len(outfiles)) + " files open for writing")
 
