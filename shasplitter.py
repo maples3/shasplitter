@@ -26,6 +26,12 @@ parser.add_argument("-p", "--progress",
 	dest="progress",
 	default=1000
 )
+parser.add_argument("-l", "--limit-files",
+	help="Limit to x number of open files",
+	type=int,
+	dest="limit_files",
+	default=100
+)
 results = parser.parse_args()
 
 # If the dir name doesn't have a trailing slash, add it
@@ -47,7 +53,11 @@ line_count = 0
 progress_interval = results.progress
 
 softlimit, hardlimit = resource.getrlimit(resource.RLIMIT_NOFILE)
-max_open_files = softlimit - 10
+real_max_open_files = softlimit - 10
+max_open_files = results.limit_files
+if (max_open_files > real_max_open_files ):
+	print("Can't have that many files open!")
+	max_open_files = real_max_open_files
 print ("Limited to " + str(max_open_files) + " open files for writing")
 
 # Open the file and read it one line at a time
@@ -75,7 +85,8 @@ with open(real_in_file, 'r') as input_file:
 				outfiles[k].flush()
 				os.fsync(outfiles[k].fileno())
 				outfiles[k].close()
-				del outfiles[k]
+			outfiles = dict()
+			print("Closed!")
 	print("Finished parsing " + str(line_count) + " lines")
 
 
