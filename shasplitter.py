@@ -3,6 +3,7 @@
 import argparse
 import os
 import subprocess
+import resource
 
 # Handle the CLI arguments
 parser = argparse.ArgumentParser(description="Split a large file into smaller files.\n"
@@ -45,6 +46,10 @@ outfiles = dict()
 line_count = 0
 progress_interval = results.progress
 
+softlimit, hardlimit = resource.getrlimit(resource.RLIMIT_NOFILE)
+max_open_files = softlimit - 10
+print ("Limited to " + str(max_open_files) + " open files for writing")
+
 # Open the file and read it one line at a time
 with open(real_in_file, 'r') as input_file:
 	for line in input_file:
@@ -53,14 +58,24 @@ with open(real_in_file, 'r') as input_file:
 		if outfname not in outfiles.keys():
 			# Open the file for appending and put it in the dict
 			outfiles[outfname] = open(outDir + outfname + ".txt", 'a')
-		outfiles[outfname].write(upper(line))
+		outfiles[outfname].write(line.upper())
 
 		# Progress message
 		if (line_count % progress_interval == 0):
 			for k in outfiles.keys():
 				outfiles[k].flush()
 				os.fsync(outfiles[k].fileno())
-			print("Completed line " + str(line_count))
+			print("Completed line " + str(line_count)
+				+ ", " + str(len(outfiles)) + " files open for writing")
+
+		# Keep within the max number of files allowed
+		if (len(outfiles) > max_open_files):
+			print("Max number of open files reached, closing output files...", end='')
+			for k in outfiles.keys():
+				outfiles[k].flush()
+				os.fsync(outfiles[k].fileno())
+				outfiles[k].close()
+				del outfiles[k]
 	print("Finished parsing " + str(line_count) + " lines")
 
 
