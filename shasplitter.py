@@ -5,13 +5,13 @@ import os
 import subprocess
 
 # Handle the CLI arguments
-parser = argparse.ArgumentParser(description="Split a large file into smaller files")
+parser = argparse.ArgumentParser(description="Split a large file into smaller files.\n"
+	"NOTE: Converts everything to UPPERCASE")
 parser.add_argument("in_file",
 	help="The input file to read.",
 	nargs=1)
 parser.add_argument("-o", "--outdir",
-	help="The directory to store the output files in.\n"
-		+ "Note that the filenames will be all UPPERCASE",
+	help="The directory to store the output files in.",
 	dest="out_dir",
 	default="out/")
 parser.add_argument("-n", "--names",
@@ -23,7 +23,7 @@ parser.add_argument("-p", "--progress",
 	help="Print out a progress message every x lines",
 	type=int,
 	dest="progress",
-	default=-1
+	default=1000
 )
 results = parser.parse_args()
 
@@ -53,10 +53,13 @@ with open(real_in_file, 'r') as input_file:
 		if outfname not in outfiles.keys():
 			# Open the file for appending and put it in the dict
 			outfiles[outfname] = open(outDir + outfname + ".txt", 'a')
-		outfiles[outfname].write(line)
+		outfiles[outfname].write(upper(line))
 
 		# Progress message
 		if (line_count % progress_interval == 0):
+			for k in outfiles.keys():
+				outfiles[k].flush()
+				os.fsync(outfiles[k].fileno())
 			print("Completed line " + str(line_count))
 	print("Finished parsing " + str(line_count) + " lines")
 
