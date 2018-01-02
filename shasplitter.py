@@ -12,22 +12,22 @@ parser.add_argument("in_file",
 	help="The input file to read.",
 	nargs=1)
 parser.add_argument("-o", "--outdir",
-	help="The directory to store the output files in.",
+        help="The directory to store the output files in (default: out/)",
 	dest="out_dir",
 	default="out/")
 parser.add_argument("-n", "--names",
-	help="The number of characters to take from the beginning of each line.",
+        help="The number of characters to take from the beginning of each line (default: 2)",
 	type=int,
 	dest='num_chars',
 	default=2)
 parser.add_argument("-p", "--progress",
-	help="Print out a progress message every x lines",
+        help="Print out a progress message every x lines (default: 1000)",
 	type=int,
 	dest="progress",
 	default=1000
 )
 parser.add_argument("-l", "--limit-files",
-	help="Limit to x number of open files",
+        help="Limit to x number of open files at a time (default: 100)",
 	type=int,
 	dest="limit_files",
 	default=100
